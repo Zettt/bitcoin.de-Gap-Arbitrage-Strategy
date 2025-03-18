@@ -246,7 +246,7 @@ class BitcoinDeAPI:
         if buy_orders and sell_orders:
             best_buy = max(buy_orders, key=lambda x: x.price)
             best_sell = min(sell_orders, key=lambda x: x.price)
-            spread = best_sell.price - best_buy.price
+            spread =  best_buy.price - best_sell.price
             spread_percentage = (spread / best_buy.price) * 100
         else:
             spread = Decimal('0')
