@@ -22,7 +22,6 @@ BITCOINDE_API_SECRET = os.getenv('BITCOINDE_API_SECRET')
 # Binance API endpoint
 BINANCE_API_URL = "https://api.binance.com/api/v3/ticker/price"
 
-
 def get_binance_price():
     """Get the current BTCEUR price from Binance."""
     try:
@@ -46,9 +45,12 @@ if __name__ == "__main__":
         # '''
         # Analyze BTC-EUR market
         analysis = api.analyze_orderbook(BitcoinDeAPI.TRADING_PAIR_BTCEUR)
+        bitcoinde_best_buy_price = float(analysis['best_buy_price'])
+        bitcoinde_best_sell_price = float(analysis['best_sell_price'])
+
         print("\nMarket Analysis:")
-        print(f"Best Buy Price: €{analysis['best_buy_price']:,.2f}")
-        print(f"Best Sell Price: €{analysis['best_sell_price']:,.2f}")
+        print(f"Best Buy Price: €{bitcoinde_best_buy_price:,.2f}")
+        print(f"Best Sell Price: €{bitcoinde_best_sell_price:,.2f}")
         print(f"Spread: €{analysis['spread']:,.2f} ({analysis['spread_percentage']:.2f}%)")
         print(f"Number of buy orders: {analysis['buy_orders_count']}")
         print(f"Number of sell orders: {analysis['sell_orders_count']}")
@@ -58,16 +60,29 @@ if __name__ == "__main__":
         
         # Get Binance price and calculate difference
         binance_price = get_binance_price()
+        
         if binance_price is not None:
-            bitcoinde_best_buy_price = float(analysis['best_buy_price'])
-            price_diff = bitcoinde_best_buy_price - binance_price
-            price_diff_percentage = (price_diff / binance_price) * 100
+            # Check arbitrage opportunity in both directions
+            bitcoinde_buy_diff = binance_price - bitcoinde_best_sell_price
+            bitcoinde_sell_diff = bitcoinde_best_buy_price - binance_price
+
             print("\nBinance Comparison:")
             print(f"Binance Spot Price: €{binance_price:,.2f}")
-            print(f"Price Difference: €{price_diff:,.2f}")
-            print(f"Price Difference Percentage: {price_diff_percentage:,.2f}%")
-            if price_diff_percentage < 1:
+            print("\nArbitrage Opportunities:")
+            print(f"Buy on Bitcoin.de -> Sell on Binance: €{bitcoinde_buy_diff:,.2f} ({(bitcoinde_buy_diff/binance_price)*100:,.2f}%)")
+            print(f"Buy on Binance -> Sell on Bitcoin.de: €{bitcoinde_sell_diff:,.2f} ({(bitcoinde_sell_diff/binance_price)*100:,.2f}%)")
+            
+            BITCOINDE_FEE = 0.5  # 0.5% trading fee
+            MIN_PROFIT_PERCENT = 1.0  # Minimum profit threshold
+            TRADE_THRESHOLD = MIN_PROFIT_PERCENT + BITCOINDE_FEE  # Combined threshold
+            if max(bitcoinde_buy_diff, bitcoinde_sell_diff)/binance_price * 100 < TRADE_THRESHOLD:
                 print("Spread too small, no arbitrage opportunity")
+            else:
+                if bitcoinde_buy_diff > bitcoinde_sell_diff:
+                    print("Best arbitrage opportunity: Buy on Bitcoin.de, sell on Binance")
+                else:
+                    print("Best arbitrage opportunity: Buy on Binance, sell on Bitcoin.de")
+                    print("This is not implemented")
 
     except BitcoinDeAPIError as e:
         logger.error(f"API Error: {e}")
