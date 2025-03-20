@@ -80,6 +80,29 @@ if __name__ == "__main__":
             else:
                 if bitcoinde_buy_diff > bitcoinde_sell_diff:
                     print("Best arbitrage opportunity: Buy on Bitcoin.de, sell on Binance")
+                    
+                    # Find the best sell order to buy from
+                    sell_orders = api.show_orderbook(BitcoinDeAPI.TRADING_PAIR_BTCEUR, 'sell')
+                    if not sell_orders:
+                        logger.warning("No sell orders available")
+                        
+                    best_sell_order = min(sell_orders, key=lambda x: x.price)
+                    
+                    try:
+                        # Execute trade with minimum amount
+                        trade_amount = best_sell_order.min_amount_currency_to_trade
+                        logger.info(f"Executing trade for {trade_amount} BTC at €{best_sell_order.price}")
+                        
+                        trade_result = api.execute_trade(
+                            best_sell_order.order_id,
+                            BitcoinDeAPI.TRADING_PAIR_BTCEUR,
+                            float(trade_amount),
+                            'buy'
+                        )
+                        logger.info(f"Trade executed successfully: {trade_result}")
+                        
+                    except BitcoinDeAPIError as e:
+                        logger.error(f"Failed to execute trade: {e}")
                 else:
                     print("Best arbitrage opportunity: Buy on Binance, sell on Bitcoin.de")
                     print("This is not implemented")
