@@ -253,3 +253,25 @@ class BitcoinDeAPI:
             'sell_orders_count': len(sell_orders),
             'timestamp': time.time()
         }
+
+    def execute_trade(self, order_id: str, trading_pair: str, amount: float, trade_type: str) -> Dict[str, Any]:
+        """Execute a trade for a specific order
+        
+        Args:
+            order_id: ID of the order to trade
+            trading_pair: Trading pair of the order (e.g. 'btceur')
+            amount: Amount of cryptocurrency to trade
+            trade_type: Type of trade ('buy' or 'sell')
+            
+        Returns:
+            Trade details
+        """
+        if trade_type not in ['buy', 'sell']:
+            raise ValueError("trade_type must be either 'buy' or 'sell'")
+            
+        params = {
+            'type': trade_type,
+            'amount': str(amount)  # API expects string
+        }
+        
+        return self._request(self.HTTP_POST, f"{trading_pair}/trades/{order_id}", params)
