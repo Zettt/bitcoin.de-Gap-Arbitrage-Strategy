@@ -15,12 +15,17 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Get API credentials from environment variables
+# API credentials and endpoints
 BITCOINDE_API_KEY = os.getenv('BITCOINDE_API_KEY')
 BITCOINDE_API_SECRET = os.getenv('BITCOINDE_API_SECRET')
 
 # Binance API endpoint
 BINANCE_API_URL = "https://api.binance.com/api/v3/ticker/price"
+
+# Trading constants
+BITCOINDE_FEE = 0.5  # 0.5% trading fee
+MIN_PROFIT_PERCENT = 1.0  # Minimum profit threshold
+TRADE_THRESHOLD = MIN_PROFIT_PERCENT + BITCOINDE_FEE  # Combined threshold
 
 def get_binance_price():
     """Get the current BTCEUR price from Binance."""
@@ -72,9 +77,6 @@ if __name__ == "__main__":
             print(f"Buy on Bitcoin.de -> Sell on Binance: €{bitcoinde_buy_diff:,.2f} ({(bitcoinde_buy_diff/binance_price)*100:,.2f}%)")
             print(f"Buy on Binance -> Sell on Bitcoin.de: €{bitcoinde_sell_diff:,.2f} ({(bitcoinde_sell_diff/binance_price)*100:,.2f}%)")
             
-            BITCOINDE_FEE = 0.5  # 0.5% trading fee
-            MIN_PROFIT_PERCENT = 1.0  # Minimum profit threshold
-            TRADE_THRESHOLD = MIN_PROFIT_PERCENT + BITCOINDE_FEE  # Combined threshold
             if max(bitcoinde_buy_diff, bitcoinde_sell_diff)/binance_price * 100 < TRADE_THRESHOLD:
                 print("Spread too small, no arbitrage opportunity")
             else:
