@@ -1,14 +1,14 @@
-# Bitcoin.de Gap Arbitrage Strategy
+# Bitcoin.de Gap Strategy
 
 A Python-based trading strategy that identifies and exploits price gaps between different payment methods on Bitcoin.de, one of Europe's leading cryptocurrency exchanges.
 
 ## Overview
 
-This project implements an arbitrage strategy that:
+This project implements a *simplistic* arbitrage strategy that:
 
 - Monitors price differences between Bitcoin.de and another spot exchange, such as Binance.
 - It is meant to be executed regularly. No websocket.
-- Identifies profitable arbitrage opportunities when gaps exceed transaction costs.
+- Identifies profitable opportunities when gaps exceed transaction costs.
 - Executes trades automatically when conditions are met.
 - Manages risk through position sizing and execution timing.
 
